@@ -6,10 +6,11 @@ import java.util.List;
 
 public class Client {
     public static void main(String[] args) {
-        Document doc1 = new Document(Authorize.TEAM_LEAD);
+        Document doc1 = new Document(Authorize.CEO);
         doc1.contents = "some project contents";
         
-        Approver manager = new ManageApprover(null, Authorize.MANAGER);
+        Approver director = new DirectorApprover(null, Authorize.DIRECTOR);
+        Approver manager = new ManagerApprover(director, Authorize.MANAGER);
         Approver lead = new LeadApprover(manager, Authorize.TEAM_LEAD);
         
         lead.approve(doc1);
@@ -22,16 +23,17 @@ public class Client {
 enum Authorize{
     TEAM_LEAD(1),
     MANAGER(2),
-    DIRECTOR(3);
+    DIRECTOR(3),
+    CEO(4);
     
-    int leve;
+    int level;
     
-    private Authorize(int leve) {
-        this.leve = leve;
+    private Authorize(int level) {
+        this.level = level;
     }
 
-    public int getLeve() {
-        return leve;
+    public int getLevel() {
+        return level;
     }
 }
 
@@ -59,7 +61,7 @@ abstract class Approver{
     }
       
     public void approve(Document document){
-        if (document.AUTH_LEVEL.getLeve() <= this.authLevel.getLeve()) {
+        if (document.AUTH_LEVEL.getLevel() <= this.authLevel.getLevel()) {
            document.approved = true;
            addSignature(document);
         }
@@ -84,9 +86,9 @@ class LeadApprover extends Approver {
     }
 }
 
-class ManageApprover extends Approver{
+class ManagerApprover extends Approver{
 
-    public ManageApprover(Approver nextApprover, Authorize authLevel) {
+    public ManagerApprover(Approver nextApprover, Authorize authLevel) {
         super(nextApprover, authLevel);
     }
 
@@ -94,5 +96,19 @@ class ManageApprover extends Approver{
     protected void addSignature(Document document) {
         System.out.println("Manager signing");
         document.signatures.add("Manager Signature");
+    }
+}
+
+
+class DirectorApprover extends Approver{
+
+    public DirectorApprover(Approver nextApprover, Authorize authLevel) {
+        super(nextApprover, authLevel);
+    }
+
+    @Override
+    protected void addSignature(Document document) {
+        System.out.println("Director signing");
+        document.signatures.add("Director Signature");
     }
 }
